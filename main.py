@@ -15,6 +15,9 @@ class Game:
         self.tile_size = self.HEIGHT // self.field_size
         self.margin = (self.HEIGHT % self.field_size) // 2
         self.left_margin = min(20, self.margin)
+        self.right_side = self.HEIGHT + self.left_margin + 10
+
+        self.font = pygame.font.SysFont('Arial', self.right_side // 32)
 
         self.field = Field(self.field_size)
 
@@ -44,6 +47,22 @@ class Game:
                                   (self.left_margin,
                                    self.field_size * self.tile_size + self.margin)))
 
+    def draw_help_text(self, time_is_going, update_time):
+        lines = ["[F11] Полноэкранный режим",
+                 " ",
+                 "[Пробел] Запустить/остановить время",
+                 f"Время {'запущено.' if time_is_going else 'остановлено.'}",
+                 " ",
+                 "Нажмите на клетку во время остановки времени,",
+                 "чтобы подсветить/затушить её.",
+                 " ",
+                 "Прокрутите колёсико мыши, чтобы изменить",
+                 "время между обновлением поля.",
+                 f"Сейчас поле обновляется раз в {update_time} мс"]
+        for line_number in range(len(lines)):
+            string = self.font.render(lines[line_number], True, (255, 255, 255), (0, 0, 0))
+            self.screen.blit(string, (self.right_side, self.margin + line_number * self.font.get_height()))
+
     def calculate_tile_coords(self, screen_x, screen_y):
         x = (screen_x - self.left_margin - 1) // self.tile_size
         y = (screen_y - self.margin - 1) // self.tile_size
@@ -52,7 +71,7 @@ class Game:
     def run(self):
         finished = False
         time_is_going = False
-        update_time = 100
+        update_time = 500
         animtimer = 0
         while not finished:
             self.clock.tick(60)
@@ -60,14 +79,14 @@ class Game:
                 if event.type == pygame.QUIT:
                     finished = True
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_f:
+                    if event.key == pygame.K_F11:
                         pygame.display.toggle_fullscreen()
                     if event.key == pygame.K_SPACE:
                         if time_is_going:
                             time_is_going = False
                         else:
                             time_is_going = True
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button != 4 and event.button != 5:
                     screen_x, screen_y = event.pos
                     if ((not time_is_going and
                          self.left_margin < screen_x <= self.left_margin + self.tile_size * self.field_size and
@@ -75,7 +94,9 @@ class Game:
                         tile_x, tile_y = self.calculate_tile_coords(screen_x, screen_y)
                         self.field.toggle_tile(tile_x, tile_y)
                 elif event.type == pygame.MOUSEWHEEL:
-                    pass
+                    update_time -= event.y * 10
+                    if update_time < 50:
+                        update_time = 50
 
             if time_is_going:
                 animtimer += self.clock.get_time()
@@ -84,6 +105,7 @@ class Game:
                     animtimer = 0
             self.screen.fill((0, 0, 0))
             self.draw_field()
+            self.draw_help_text(time_is_going, update_time)
             pygame.display.flip()
 
 
