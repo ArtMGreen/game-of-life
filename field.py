@@ -60,3 +60,8 @@ class Field:
                     self.set_tile_alive(x, y)
                 else:
                     self.set_tile_dead(x, y)
+
+    def clear(self):
+        for x in range(self.size):
+            for y in range(self.size):
+                self.set_tile_dead(x, y)

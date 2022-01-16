@@ -58,7 +58,9 @@ class Game:
                  " ",
                  "Прокрутите колёсико мыши, чтобы изменить",
                  "время между обновлением поля.",
-                 f"Сейчас поле обновляется раз в {update_time} мс"]
+                 f"Сейчас поле обновляется раз в {update_time} мс",
+                 " ",
+                 "[0] Очистить поле"]
         for line_number in range(len(lines)):
             string = self.font.render(lines[line_number], True, (255, 255, 255), (0, 0, 0))
             self.screen.blit(string, (self.right_side, self.margin + line_number * self.font.get_height()))
@@ -81,11 +83,13 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_F11:
                         pygame.display.toggle_fullscreen()
-                    if event.key == pygame.K_SPACE:
+                    elif event.key == pygame.K_SPACE:
                         if time_is_going:
                             time_is_going = False
                         else:
                             time_is_going = True
+                    elif event.key == pygame.K_0:
+                        self.field.clear()
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button != 4 and event.button != 5:
                     screen_x, screen_y = event.pos
                     if ((not time_is_going and
